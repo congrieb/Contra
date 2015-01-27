@@ -18,6 +18,7 @@ public class PE_Guy : PE_Obj {
 
 	public bool isCrouching = false;
 	private bool isInAir = false;
+	private bool isClimbing = false;
 
 	public float speed = 5f;
 
@@ -30,6 +31,8 @@ public class PE_Guy : PE_Obj {
 	protected int layerTimerClip = 0;
 	private int layerTimerCrouchMax = 20;
 	private int layerTimerClipMax = 15;
+
+	private float climbTimer = 0f;
 
 	private bool isInWater;
 	private SpriteRenderer spriteRend;
@@ -348,19 +351,28 @@ public class PE_Guy : PE_Obj {
 				Vector3 thatP = that.transform.position;
 				Vector3 delta = (pos1 - this.transform.lossyScale/2) - (thatP - that.transform.lossyScale/2);
 				if(isInWater){
+					if(!isClimbing){
+						climbTimer = Time.time;
+						isClimbing = true;
+					}
 					Vector3 newPos = transform.position;
 					float spriteWidth = SliceRight.bounds.size.x;
-					//If you are approaching from the left then stay on the right edge
-					RepositionToTop(that);
+
+					//Take a quarter of a second to climb up ledge
+					if(Time.time > climbTimer + .15f){
+						isInWater = false;
+						isClimbing = false;
+						RepositionToTop(that);
+						break;
+					}
 					newPos = transform.position;
-					if(vel.x < 0){
-						newPos.x = thatP.x - (that.transform.lossyScale.x/2) + (this.transform.lossyScale.x / 2) - spriteWidth / 2;
+					if(transform.position.x > thatP.x){
+						newPos.x = thatP.x + (that.transform.lossyScale.x/2);
 					}
-					else if(vel.x > 0){
+					else if(transform.position.x < thatP.x){
 						print ("Here");
-						newPos.x = thatP.x - (that.transform.lossyScale.x/2) + (this.transform.lossyScale.x / 2) + spriteWidth / 2;
+						newPos.x = thatP.x - (that.transform.lossyScale.x/2);
 					}
-					isInWater = false;
 					this.transform.position = newPos;
 				
 				}
@@ -392,10 +404,8 @@ public class PE_Guy : PE_Obj {
 
 				//If you are in the water then you can no longer jump
 				isInWater = true;
-				//If you were in tuck position then untuck
-				if(this.transform.lossyScale.y == ogScale.y*tuckHeightRatio){
-					this.transform.localScale = ogScale;
-				}
+				isInAir = false;
+
 				RepositionToTop(that);
 				break;
 			}
