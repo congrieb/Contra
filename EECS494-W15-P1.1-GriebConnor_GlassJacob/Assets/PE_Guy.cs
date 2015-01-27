@@ -194,16 +194,7 @@ public class PE_Guy : PE_Obj {
 		if (Input.GetKeyDown(KeyCode.X) || Input.GetKeyDown(KeyCode.Period)) {
 			if(vel.y == 0 && !isCrouching && !isInWater){ // Jump
 				vel.y += jumpSpeed;
-				/*
-				// Change size
-				Vector3 newScale = this.transform.localScale;
-				newScale.y *= tuckHeightRatio;
-				this.transform.localScale = newScale;
-				// Change position
-				Vector3 newPos = this.transform.position;
-				newPos.y -= (ogScale.y/2f) - (newScale.y/2f);
-				this.transform.position = newPos;
-				*/
+				makeJump();
 				isInAir = true;
 			} else if(isCrouching) { // Drop below
 				makeNotCrouch();
@@ -257,6 +248,34 @@ public class PE_Guy : PE_Obj {
 		box.size = boxBound;
 		isCrouching = true;
 	}
+
+
+	void makeJump() {
+		// Make not crouching
+		float oldHeight = SliceRight.bounds.size.y;
+		float newHeight = SliceCrouchRight.bounds.size.y;
+		float scaleChange = newHeight / oldHeight;
+		
+		BoxCollider box = this.GetComponent<BoxCollider> ();
+		Vector3 boxBound = box.size;
+		boxBound.y *= 1f * scaleChange;
+		box.size = boxBound;
+
+	}
+
+	void makeNotJump() {
+		// Make not crouching
+		float oldHeight = SliceRight.bounds.size.y;
+		float newHeight = SliceCrouchRight.bounds.size.y;
+		float scaleChange = newHeight / oldHeight;
+		
+		BoxCollider box = this.GetComponent<BoxCollider> ();
+		Vector3 boxBound = box.size;
+		boxBound.y *= 1f / scaleChange;
+		box.size = boxBound;
+		
+	}
+
 
 	void makeNotCrouch() {
 		// Make not crouching
@@ -390,7 +409,10 @@ public class PE_Guy : PE_Obj {
 							layerTimerClip = 1;
 						} else {
 							// Landed!
-							isInAir = false;
+							if(isInAir){
+								isInAir = false;
+								makeNotJump();
+							}
 							if(fD == FacingDir.down)
 								fD = lastDir;
 							RepositionToTop(that);
