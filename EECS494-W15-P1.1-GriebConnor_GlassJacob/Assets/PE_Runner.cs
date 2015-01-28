@@ -55,6 +55,7 @@ public class PE_Runner : PE_Obj {
 
 			case PE_Collider.guy: // collide with guy
 				PhysEngine.objs.Remove(that.GetComponent<PE_Obj>());
+				Application.LoadLevel(0);
 				Destroy(that.gameObject);
 				break;
 

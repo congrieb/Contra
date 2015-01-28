@@ -28,9 +28,7 @@ public class PE_Guy : PE_Obj {
 	private float tuckHeightRatio = .5f;
 	
 	protected int layerTimerCrouch = 0;
-	protected int layerTimerClip = 0;
 	private int layerTimerCrouchMax = 20;
-	private int layerTimerClipMax = 15;
 
 	private float climbTimer = 0f;
 
@@ -39,7 +37,7 @@ public class PE_Guy : PE_Obj {
 	private float nextBurst;
 	private int numFired;
 	private float nextFire;
-
+	private bool bulletTime = false;
 
 	private bool isInWater;
 	private SpriteRenderer spriteRend;
@@ -122,6 +120,21 @@ public class PE_Guy : PE_Obj {
 
 		updateSprite ();
 
+		// Bullet-time
+		if(Input.GetKeyDown(KeyCode.R)) {
+			if(!bulletTime){
+				speed *= 3;
+				vel.x *= 3;
+				Time.timeScale = (1f/3f);
+				bulletTime = true;
+			} else {
+				speed /= 3;
+				vel.x /= 3;
+				Time.timeScale = 1f;
+				bulletTime = false;
+			}
+		}
+
 		// Left Button
 		if(Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) {
 			if(isCrouching){
@@ -164,6 +177,14 @@ public class PE_Guy : PE_Obj {
 				fD = FacingDir.downLeft;
 			}
 		}
+
+		if(Input.GetKeyDown(KeyCode.P)){
+			Application.LoadLevel("_Scene_1");
+		}
+		if (Input.GetKeyDown (KeyCode.O)) {
+						Application.LoadLevel ("_Scene_0");
+		}
+
 		if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)) {
 			if(isCrouching) {
 				makeNotCrouch();
@@ -364,11 +385,6 @@ public class PE_Guy : PE_Obj {
 			layerTimerCrouch++;
 		}
 
-		if (layerTimerClip >= layerTimerClipMax) {
-			Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platforms"), false);
-		} else if (layerTimerClip > 0){
-			layerTimerClip++;
-		}
 
 	
 	}
@@ -415,24 +431,16 @@ public class PE_Guy : PE_Obj {
 						} else if (delta.y >= 0) { // Top
 					
 								if (vel.y <= 0) {
-										float rightEdgeD = (pos0.x - this.transform.lossyScale.x / 2) - (that.transform.position.x + that.transform.lossyScale.x / 2);
-										float leftEdgeD = (pos0.x + this.transform.lossyScale.x / 2) - (that.transform.position.x - that.transform.lossyScale.x / 2);
-										if (rightEdgeD > 0f) {
-												Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("Character"), LayerMask.NameToLayer ("Platforms"), true);
-												layerTimerClip = 1;
-										} else if (leftEdgeD < 0f) {
-												Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("Character"), LayerMask.NameToLayer ("Platforms"), true);
-												layerTimerClip = 1;
-										} else {
-												// Landed!
-												if (isInAir) {
-														isInAir = false;
-														makeNotJump ();
-												}
-												if (fD == FacingDir.down)
-														fD = lastDir;
-												RepositionToTop (that);
+								
+										// Landed!
+										if (isInAir) {
+												isInAir = false;
+												makeNotJump ();
 										}
+										if (fD == FacingDir.down)
+												fD = lastDir;
+										RepositionToTop (that);
+							
 								}
 						}
 				
@@ -442,7 +450,10 @@ public class PE_Guy : PE_Obj {
 
 				//If you are in the water then you can no longer jump
 						isInWater = true;
-						isInAir = false;
+						if(isInAir){
+							isInAir = false;
+							makeNotJump();
+						}
 
 						RepositionToTop (that);
 						break;
@@ -450,6 +461,7 @@ public class PE_Guy : PE_Obj {
 
 				case PE_Collider.enemyBullet:
 						PhysEngine.objs.Remove (this.GetComponent<PE_Obj> ());
+						Application.LoadLevel(0);
 						Destroy (this.gameObject);
 						break;
 				}
