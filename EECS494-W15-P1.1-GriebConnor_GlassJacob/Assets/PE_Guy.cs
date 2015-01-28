@@ -375,7 +375,6 @@ public class PE_Guy : PE_Obj {
 						isClimbing = true;
 					}
 					Vector3 newPos = transform.position;
-					float spriteWidth = SliceRight.bounds.size.x;
 
 					//Take a quarter of a second to climb up ledge
 					if(Time.time > climbTimer + .15f){
@@ -389,7 +388,7 @@ public class PE_Guy : PE_Obj {
 						newPos.x = thatP.x + (that.transform.lossyScale.x/2);
 					}
 					else if(transform.position.x < thatP.x){
-						print ("Here");
+
 						newPos.x = thatP.x - (that.transform.lossyScale.x/2);
 					}
 					this.transform.position = newPos;

@@ -85,9 +85,6 @@ public class PhysEngine : MonoBehaviour {
 				newPos.x = po.transform.position.x;
 				this.transform.position = newPos;
 			}
-			if(OnScreen(po) &&  po.coll == PE_Collider.enemy ){
-				po.vel.x = -5;
-			}
 			TimeStep(po, dt);
 		}
 		
