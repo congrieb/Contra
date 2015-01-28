@@ -14,7 +14,8 @@ public enum PE_Collider {
 	platform,
 	guy,
 	enemy,
-	water
+	water,
+	other
 }
 
 public class PhysEngine : MonoBehaviour {
@@ -75,7 +76,7 @@ public class PhysEngine : MonoBehaviour {
 
 		foreach (PE_Obj po in objs) {
 			//Adjust Camera if guy has moved pass mid way point of the screen
-			if(OffScreen(po) && po.coll == PE_Collider.friendlyBullet){
+			if(OffScreen(po) && (po.coll == PE_Collider.friendlyBullet || po.coll == PE_Collider.enemyBullet)){
 				objs.Remove(po);
 				Destroy(po.gameObject);
 				break;

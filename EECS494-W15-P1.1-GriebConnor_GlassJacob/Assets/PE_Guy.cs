@@ -34,6 +34,13 @@ public class PE_Guy : PE_Obj {
 
 	private float climbTimer = 0f;
 
+	public float fireRate = .1f;
+	public float burstRate = 2f;
+	private float nextBurst;
+	private int numFired;
+	private float nextFire;
+
+
 	private bool isInWater;
 	private SpriteRenderer spriteRend;
 
@@ -49,6 +56,8 @@ public class PE_Guy : PE_Obj {
 	public Sprite SliceDownRight;
 	public Sprite SliceUpFaceRight;
 	public Sprite SliceUpFaceLeft;
+
+
 
 
 
@@ -107,7 +116,9 @@ public class PE_Guy : PE_Obj {
 
 	// Update is called once per frame
 	void Update () {
-		//print (fD);
+		//Reset Burst Fire
+			if (Time.time > nextBurst)
+						numFired = 0;
 
 		updateSprite ();
 
@@ -297,6 +308,17 @@ public class PE_Guy : PE_Obj {
 	}
 
 	void shootBullet() {
+		if (Time.time < nextFire)
+			return;
+		else if (numFired >= 4) {
+			return;
+		} else {
+			print("Here");
+			if(numFired == 0)
+				nextBurst = Time.time + burstRate;
+			nextFire = Time.time + fireRate;
+			numFired++;
+		}
 		GameObject bullet = Instantiate (bulletPrefab) as GameObject;
 		bullet.transform.position = transform.position;
 		float bulletSpeed = bullet.GetComponent<PE_Bullet>().speed;
@@ -361,77 +383,78 @@ public class PE_Guy : PE_Obj {
 	}
 
 	override protected void ResolveCollisionWith(PE_Obj that) {
-		switch (this.coll) {
-		case PE_Collider.guy:
 			switch (that.coll) {
-			case PE_Collider.platform:
+				case PE_Collider.platform:
 				
 				// In Progress
-				Vector3 thatP = that.transform.position;
-				Vector3 delta = (pos1 - this.transform.lossyScale/2) - (thatP - that.transform.lossyScale/2);
-				if(isInWater){
-					if(!isClimbing){
-						climbTimer = Time.time;
-						isClimbing = true;
-					}
-					Vector3 newPos = transform.position;
+						Vector3 thatP = that.transform.position;
+						Vector3 delta = (pos1 - this.transform.lossyScale / 2) - (thatP - that.transform.lossyScale / 2);
+						if (isInWater) {
+								if (!isClimbing) {
+										climbTimer = Time.time;
+										isClimbing = true;
+								}
+								Vector3 newPos = transform.position;
 
-					//Take a quarter of a second to climb up ledge
-					if(Time.time > climbTimer + .15f){
-						isInWater = false;
-						isClimbing = false;
-						RepositionToTop(that);
-						break;
-					}
-					newPos = transform.position;
-					if(transform.position.x > thatP.x){
-						newPos.x = thatP.x + (that.transform.lossyScale.x/2);
-					}
-					else if(transform.position.x < thatP.x){
+								//Take a quarter of a second to climb up ledge
+								if (Time.time > climbTimer + .15f) {
+										isInWater = false;
+										isClimbing = false;
+										RepositionToTop (that);
+										break;
+								}
+								newPos = transform.position;
+								if (transform.position.x > thatP.x) {
+										newPos.x = thatP.x + (that.transform.lossyScale.x / 2);
+								} else if (transform.position.x < thatP.x) {
 
-						newPos.x = thatP.x - (that.transform.lossyScale.x/2);
-					}
-					this.transform.position = newPos;
+										newPos.x = thatP.x - (that.transform.lossyScale.x / 2);
+								}
+								this.transform.position = newPos;
 				
-				}
-
-				else if (delta.y >= 0) { // Top
+						} else if (delta.y >= 0) { // Top
 					
-					if(vel.y <= 0){
-						float rightEdgeD = (pos0.x - this.transform.lossyScale.x/2) - (that.transform.position.x + that.transform.lossyScale.x/2);
-						float leftEdgeD = (pos0.x + this.transform.lossyScale.x/2) - (that.transform.position.x - that.transform.lossyScale.x/2);
-						if(rightEdgeD > 0f) {
-							Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platforms"), true);
-							layerTimerClip = 1;
-						} else if(leftEdgeD < 0f) {
-							Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platforms"), true);
-							layerTimerClip = 1;
-						} else {
-							// Landed!
-							if(isInAir){
-								isInAir = false;
-								makeNotJump();
-							}
-							if(fD == FacingDir.down)
-								fD = lastDir;
-							RepositionToTop(that);
+								if (vel.y <= 0) {
+										float rightEdgeD = (pos0.x - this.transform.lossyScale.x / 2) - (that.transform.position.x + that.transform.lossyScale.x / 2);
+										float leftEdgeD = (pos0.x + this.transform.lossyScale.x / 2) - (that.transform.position.x - that.transform.lossyScale.x / 2);
+										if (rightEdgeD > 0f) {
+												Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("Character"), LayerMask.NameToLayer ("Platforms"), true);
+												layerTimerClip = 1;
+										} else if (leftEdgeD < 0f) {
+												Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("Character"), LayerMask.NameToLayer ("Platforms"), true);
+												layerTimerClip = 1;
+										} else {
+												// Landed!
+												if (isInAir) {
+														isInAir = false;
+														makeNotJump ();
+												}
+												if (fD == FacingDir.down)
+														fD = lastDir;
+												RepositionToTop (that);
+										}
+								}
 						}
-					}
-				}
 				
-				break;
+						break;
 				//TODO Change this to handle sprites properly
-			case PE_Collider.water:
+				case PE_Collider.water:
 
 				//If you are in the water then you can no longer jump
-				isInWater = true;
-				isInAir = false;
+						isInWater = true;
+						isInAir = false;
 
-				RepositionToTop(that);
-				break;
-			}
+						RepositionToTop (that);
+						break;
+
+
+				case PE_Collider.enemyBullet:
+						PhysEngine.objs.Remove (this.GetComponent<PE_Obj> ());
+						Destroy (this.gameObject);
+						break;
+				}
 			
-			break;
+
 		}
-	}
+
 }
