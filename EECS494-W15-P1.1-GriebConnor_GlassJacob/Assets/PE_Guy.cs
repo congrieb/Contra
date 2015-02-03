@@ -41,9 +41,11 @@ public class PE_Guy : PE_Obj {
 	private float climbTimer = 0f;
 
 	//How long between shots
-	public float fireRate = .1f;
+	public float normFireRate;
+	public float normBurstRate;
+	private float fireRate = .1f;
 	//How long between bursts
-	public float burstRate = 2f;
+	private float burstRate = 2f;
 	public GunType gunType = GunType.normal;
 	private float nextBurst;
 	private int numFired;
@@ -87,8 +89,8 @@ public class PE_Guy : PE_Obj {
 			burstRate = .15f;
 		}
 		else{
-			fireRate = .1f;
-			burstRate = .2f;
+			fireRate = normFireRate;
+			burstRate = normBurstRate;
 		}
 	}
 
