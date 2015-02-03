@@ -40,7 +40,9 @@ public class PE_Guy : PE_Obj {
 
 	private float climbTimer = 0f;
 
+	//How long between shots
 	public float fireRate = .1f;
+	//How long between bursts
 	public float burstRate = 2f;
 	public GunType gunType = GunType.normal;
 	private float nextBurst;
@@ -77,6 +79,17 @@ public class PE_Guy : PE_Obj {
 		ogScale = transform.lossyScale;
 		spriteRend = this.GetComponent<SpriteRenderer> ();
 		base.Start();
+	}
+
+	void updateGunProps(){
+		if (gunType == GunType.machineGun){
+			fireRate = .12f;
+			burstRate = .15f;
+		}
+		else{
+			fireRate = .1f;
+			burstRate = .2f;
+		}
 	}
 
 	void updateSprite(){
@@ -134,6 +147,7 @@ public class PE_Guy : PE_Obj {
 						numFired = 0;
 
 		updateSprite ();
+		updateGunProps ();
 
 		// Bullet-time
 		if(Input.GetKeyDown(KeyCode.R)) {
@@ -252,6 +266,10 @@ public class PE_Guy : PE_Obj {
 		}
 
 		// Shoot Button
+		if ((Input.GetKey(KeyCode.Z) || Input.GetKey (KeyCode.Comma)) && gunType == GunType.machineGun) {
+			shootBullet();
+		}
+
 		if(Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Comma)){
 			shootBullet();
 		}
@@ -416,19 +434,21 @@ public class PE_Guy : PE_Obj {
 		GameObject bullet4 = Instantiate (bulletPrefab) as GameObject;
 		bullet4.transform.position = transform.position;
 
+		float spreadRate = Mathf.PI / 18;
+
 		float bulletSpeed = bullet1.GetComponent<PE_Bullet>().speed;
 
-		bullet1.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle - (2 * Mathf.PI / 12)) * bulletSpeed;
-		bullet1.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle - (2 * Mathf.PI / 12)) * bulletSpeed;
+		bullet1.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle - (2 * spreadRate)) * bulletSpeed;
+		bullet1.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle - (2 * spreadRate)) * bulletSpeed;
 
-		bullet2.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle - (Mathf.PI / 12)) * bulletSpeed;
-		bullet2.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle - (Mathf.PI / 12)) * bulletSpeed;
+		bullet2.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle - (spreadRate)) * bulletSpeed;
+		bullet2.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle - (spreadRate)) * bulletSpeed;
 
-		bullet3.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle + (Mathf.PI / 12)) * bulletSpeed;
-		bullet3.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle + (Mathf.PI / 12)) * bulletSpeed;
+		bullet3.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle + (spreadRate)) * bulletSpeed;
+		bullet3.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle + (spreadRate)) * bulletSpeed;
 
-		bullet4.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle + (2 * Mathf.PI / 12)) * bulletSpeed;
-		bullet4.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle + (2 * Mathf.PI / 12)) * bulletSpeed;
+		bullet4.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle + (2 * spreadRate)) * bulletSpeed;
+		bullet4.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle + (2 * spreadRate)) * bulletSpeed;
 
 	}
 	
