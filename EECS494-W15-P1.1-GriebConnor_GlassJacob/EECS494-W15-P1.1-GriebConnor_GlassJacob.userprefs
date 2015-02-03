@@ -1,13 +1,13 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\PE_Guy.cs">
     <Files>
       <File FileName="..\..\..\Unity Games\EECS494-W15-P1.1-GriebConnor_GlassJacob\Assets\PE_Bullet.cs" Line="1" Column="1" />
-      <File FileName="..\..\..\Unity Games\EECS494-W15-P1.1-GriebConnor_GlassJacob\Assets\PE_Obj.cs" Line="26" Column="3" />
-      <File FileName="Assets\PhysEngine.cs" Line="16" Column="8" />
-      <File FileName="Assets\Turret.cs" Line="46" Column="5" />
-      <File FileName="Assets\PE_Runner.cs" Line="58" Column="30" />
-      <File FileName="Assets\PE_Guy.cs" Line="186" Column="3" />
+      <File FileName="..\..\..\Unity Games\EECS494-W15-P1.1-GriebConnor_GlassJacob\Assets\PE_Obj.cs" Line="1" Column="1" />
+      <File FileName="Assets\PhysEngine.cs" Line="1" Column="1" />
+      <File FileName="Assets\Turret.cs" Line="1" Column="1" />
+      <File FileName="Assets\PE_Runner.cs" Line="1" Column="1" />
+      <File FileName="Assets\PE_Guy.cs" Line="17" Column="40" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

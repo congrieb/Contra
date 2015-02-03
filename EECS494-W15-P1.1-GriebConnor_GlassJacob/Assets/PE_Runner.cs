@@ -34,23 +34,12 @@ public class PE_Runner : PE_Obj {
 
 			case PE_Collider.platform: // collide with platform
 				Vector3 thatP = that.transform.position;
-				Vector3 delta = (pos1 - this.transform.lossyScale/2) - (thatP - that.transform.lossyScale/2);
-				if (delta.y >= 0 && vel.y <= 0) { // Check coming from above and moving down
-					float rightEdgeD = (pos0.x - this.transform.lossyScale.x/2) - (that.transform.position.x + that.transform.lossyScale.x/2);
-					float leftEdgeD = (pos0.x + this.transform.lossyScale.x/2) - (that.transform.position.x - that.transform.lossyScale.x/2);
-					if(rightEdgeD > 0f) { // Check coming from right
-						Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platforms"), true);
-						layerTimerClip = 1;
-					} else if(leftEdgeD < 0f) { // Check coming from left
-						Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platforms"), true);
-						layerTimerClip = 1;
-					} else { // Otherwise, land!
-						Vector3 newPos = transform.position;
-						newPos.y = thatP.y + (this.transform.lossyScale.y/2) + (that.transform.lossyScale.y/2);
-						transform.position = newPos;
-						vel.y = 0;
-					}
-				}
+				Vector3 newPos = transform.position;
+				float boxSizeY = this.GetComponent<BoxCollider> ().size.y;
+				newPos.y = thatP.y + (this.transform.lossyScale.y * .5f * boxSizeY) + (that.transform.lossyScale.y / 2);
+				transform.position = newPos;
+				vel.y = 0;
+
 				break;
 
 			case PE_Collider.guy: // collide with guy

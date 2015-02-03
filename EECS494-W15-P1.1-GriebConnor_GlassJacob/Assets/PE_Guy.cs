@@ -13,6 +13,15 @@ public enum FacingDir{
 	upLeft,
 }
 
+public enum GunType{
+	normal,
+	rapidFire,
+	machineGun,
+	spreadGun,
+	laser,
+	flame
+}
+
 public class PE_Guy : PE_Obj {
 	public FacingDir fD = FacingDir.right;
 
@@ -25,15 +34,15 @@ public class PE_Guy : PE_Obj {
 	private FacingDir lastDir = FacingDir.right;
 	public float jumpSpeed = 20f;
 	private Vector3 ogScale;
-	private float tuckHeightRatio = .5f;
 	
-	protected int layerTimerCrouch = 0;
-	private int layerTimerCrouchMax = 20;
+	protected float layerTimerCrouch = 0;
+	private float layerTimerCrouchMax = .25f;
 
 	private float climbTimer = 0f;
 
 	public float fireRate = .1f;
 	public float burstRate = 2f;
+	public GunType gunType = GunType.normal;
 	private float nextBurst;
 	private int numFired;
 	private float nextFire;
@@ -41,6 +50,7 @@ public class PE_Guy : PE_Obj {
 
 	private bool isInWater;
 	private SpriteRenderer spriteRend;
+
 
 	//Sprites
 	public Sprite SliceLeft;
@@ -73,43 +83,48 @@ public class PE_Guy : PE_Obj {
 
 		if (isInAir == true)
 						spriteRend.sprite = SliceJump;
-		else if (isCrouching == true && vel.x == 0) {
-			if(fD == FacingDir.right || fD == FacingDir.downRight || fD == FacingDir.upRight){
-				spriteRend.sprite = SliceCrouchRight;
-			}
-			else{
-				spriteRend.sprite = SliceCrouchLeft;
-			}
-		}
-		else {
-				switch (fD) {
-				case FacingDir.downLeft:
-						spriteRend.sprite = SliceDownLeft;
-						break;
-				case FacingDir.upLeft:
-						spriteRend.sprite = SliceUpLeft;
-						break;
-				case FacingDir.downRight:
-						spriteRend.sprite = SliceDownRight;
-						break;
-				case FacingDir.upRight:
-						spriteRend.sprite = SliceUpRight;
-						break;
-				case FacingDir.right:
-						spriteRend.sprite = SliceRight;
-						break;
-				case FacingDir.left:
-						spriteRend.sprite = SliceLeft;
-						break;
-				case FacingDir.upFaceLeft:
-						spriteRend.sprite = SliceUpFaceLeft;
-						break;
-				case FacingDir.upFaceRight:
-						spriteRend.sprite = SliceUpFaceRight;
-						break;
+				else if (isCrouching == true && vel.x == 0) {
+						if (fD == FacingDir.right || fD == FacingDir.downRight || fD == FacingDir.upRight) {
+								spriteRend.sprite = SliceCrouchRight;
+						} else {
+								spriteRend.sprite = SliceCrouchLeft;
+						}
+				} else {
+						switch (fD) {
+						case FacingDir.downLeft:
+								spriteRend.sprite = SliceDownLeft;
+								break;
+						case FacingDir.upLeft:
+								spriteRend.sprite = SliceUpLeft;
+								break;
+						case FacingDir.downRight:
+								spriteRend.sprite = SliceDownRight;
+								break;
+						case FacingDir.upRight:
+								spriteRend.sprite = SliceUpRight;
+								break;
+						case FacingDir.right:
+								spriteRend.sprite = SliceRight;
+								break;
+						case FacingDir.left:
+								spriteRend.sprite = SliceLeft;
+								break;
+						case FacingDir.upFaceLeft:
+								spriteRend.sprite = SliceUpFaceLeft;
+								break;
+						case FacingDir.upFaceRight:
+								spriteRend.sprite = SliceUpFaceRight;
+								break;
+						}
+						BoxCollider box = this.GetComponent<BoxCollider> ();
+						Vector3 newCenter = box.center;
+						if (fD == FacingDir.downLeft || fD == FacingDir.left || fD == FacingDir.upLeft) {
+								newCenter.x = .1f;
+						} else {
+								newCenter.x = -.1f;
+						}
+						box.center = newCenter;
 				}
-		}
-
 	}
 
 	// Update is called once per frame
@@ -232,7 +247,7 @@ public class PE_Guy : PE_Obj {
 				makeNotCrouch();
 				// Fall through platforms
 				Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platforms"), true);
-				layerTimerCrouch = 1;
+				layerTimerCrouch = Time.time;
 			}
 		}
 
@@ -343,46 +358,83 @@ public class PE_Guy : PE_Obj {
 		GameObject bullet = Instantiate (bulletPrefab) as GameObject;
 		bullet.transform.position = transform.position;
 		float bulletSpeed = bullet.GetComponent<PE_Bullet>().speed;
+		float fireAngle = 0; 
 		switch (fD) {
 		case FacingDir.upFaceLeft:
+			fireAngle = Mathf.PI / 2;
 			bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
 			break;
 		case FacingDir.upFaceRight:
+			fireAngle = Mathf.PI / 2;
 			bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
 			break;
 		case FacingDir.upRight:
+			fireAngle = Mathf.PI / 4;
 			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(Mathf.PI/4) * bulletSpeed;
 			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(Mathf.PI/4) * bulletSpeed;
 			break;
 		case FacingDir.right:
+			fireAngle = 0;
 			bullet.GetComponent<PE_Bullet>().vel.x = bulletSpeed;
 			break;
 		case FacingDir.downRight:
+			fireAngle = 7*Mathf.PI/4;
 			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(7*Mathf.PI/4) * bulletSpeed;
 			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(7*Mathf.PI/4) * bulletSpeed;
 			break;
 		case FacingDir.down:
+			fireAngle = 3 * Mathf.PI / 2;
 			bullet.GetComponent<PE_Bullet>().vel.y = -bulletSpeed;
 			break;
 		case FacingDir.downLeft:
+			fireAngle = 5*Mathf.PI/4;
 			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(5*Mathf.PI/4) * bulletSpeed;
 			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(5*Mathf.PI/4) * bulletSpeed;
 			break;
 		case FacingDir.left:
+			fireAngle = Mathf.PI;
 			bullet.GetComponent<PE_Bullet>().vel.x = -bulletSpeed;
 			break;
 		case FacingDir.upLeft:
+			fireAngle = 3*Mathf.PI/4;
 			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(3*Mathf.PI/4) * bulletSpeed;
 			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(3*Mathf.PI/4) * bulletSpeed;
 			break;
 		}
+		if (gunType == GunType.spreadGun)
+						spreadFire (fireAngle);
+	}
+
+	void spreadFire(float fireAngle){
+
+		GameObject bullet1 = Instantiate (bulletPrefab) as GameObject;
+		bullet1.transform.position = transform.position;
+		GameObject bullet2 = Instantiate (bulletPrefab) as GameObject;
+		bullet2.transform.position = transform.position;
+		GameObject bullet3 = Instantiate (bulletPrefab) as GameObject;
+		bullet3.transform.position = transform.position;
+		GameObject bullet4 = Instantiate (bulletPrefab) as GameObject;
+		bullet4.transform.position = transform.position;
+
+		float bulletSpeed = bullet1.GetComponent<PE_Bullet>().speed;
+
+		bullet1.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle - (2 * Mathf.PI / 12)) * bulletSpeed;
+		bullet1.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle - (2 * Mathf.PI / 12)) * bulletSpeed;
+
+		bullet2.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle - (Mathf.PI / 12)) * bulletSpeed;
+		bullet2.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle - (Mathf.PI / 12)) * bulletSpeed;
+
+		bullet3.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle + (Mathf.PI / 12)) * bulletSpeed;
+		bullet3.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle + (Mathf.PI / 12)) * bulletSpeed;
+
+		bullet4.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(fireAngle + (2 * Mathf.PI / 12)) * bulletSpeed;
+		bullet4.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(fireAngle + (2 * Mathf.PI / 12)) * bulletSpeed;
+
 	}
 	
 	void FixedUpdate(){
-		if (layerTimerCrouch >= layerTimerCrouchMax) {
+		if (Time.time >= (layerTimerCrouch + layerTimerCrouchMax)) {
 			Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Character"), LayerMask.NameToLayer("Platforms"), false);
-		} else if (layerTimerCrouch > 0){
-			layerTimerCrouch++;
 		}
 
 
