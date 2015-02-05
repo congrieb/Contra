@@ -90,12 +90,16 @@ public class PE_Guy : PE_Obj {
 	private void respawn(bool fell , Vector3 whereAt){
 
 		print ("You fell");
-		whereAt.y  = 330;
+		whereAt.y  = 300;
 		if(didIFall)
 			whereAt.x -= 20;
 		acc.y = 0;
+		vel.y = 0;
 		this.transform.position = whereAt;
 		isDead = false;
+		gunType = GunType.normal;
+		fireRate = normFireRate;
+		burstRate = normBurstRate;
 		
 	}
 	
@@ -172,7 +176,7 @@ public class PE_Guy : PE_Obj {
 		}
 
 		if (lives < 0)
-						Application.LoadLevel ("_Scene_0");
+						Application.LoadLevel (Application.loadedLevel);
 
 		//Reset Burst Fire
 			if (Time.time > nextBurst)
@@ -182,6 +186,8 @@ public class PE_Guy : PE_Obj {
 
 		// Bullet-time
 		if(Input.GetKeyDown(KeyCode.R)) {
+			if( Application.loadedLevelName == "_Scene_0")
+				return;
 			if(!bulletTime){
 				speed *= 2f;
 				vel.x *= 2f;

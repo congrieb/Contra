@@ -11,7 +11,36 @@ public enum PowerupType{
 
 public class PE_Powerup : PE_Obj {
 	public PowerupType powerupType;
-	
+
+	public Material machineColor;
+	public Material spreadColor;
+	public Material flameColor;
+	public Material laserColor;
+	public Material rapidColor;
+
+	override protected void Start(){
+		switch (this.powerupType) {
+		case PowerupType.rapidFire:
+			renderer.material = rapidColor;
+			break;
+
+		case PowerupType.machineGun:
+			renderer.material = machineColor;
+			break;
+		case PowerupType.spreadGun:
+			renderer.material = spreadColor;
+			break;
+		case PowerupType.laser:
+			renderer.material = laserColor;
+			break;
+		case PowerupType.flame:
+			renderer.material = flameColor;
+			break;
+
+		}
+		base.Start ();
+	}
+
 	override protected void ResolveCollisionWith(PE_Obj that) {
 		switch (that.coll) {
 			case PE_Collider.platform: // collide with platform

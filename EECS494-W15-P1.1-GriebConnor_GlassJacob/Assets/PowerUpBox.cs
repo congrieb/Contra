@@ -6,7 +6,7 @@ public class PowerUpBox : PE_Obj {
 	private int health = 2;
 
 	public GameObject powerUpPrefab;
-
+	public PowerupType powerupType = PowerupType.rapidFire;
 
 
 
@@ -16,6 +16,7 @@ public class PowerUpBox : PE_Obj {
 			// Instantiate Powerup
 			GameObject powerupGO = Instantiate(powerUpPrefab) as GameObject;
 			powerupGO.transform.position = this.transform.position;
+			powerupGO.GetComponent<PE_Powerup>().powerupType = this.powerupType;
 		
 			// Kill Self
 			PhysEngine.objs.Remove(this.GetComponent<PE_Obj>());

@@ -4,7 +4,8 @@ using System.Collections;
 public enum TurretType{
 	man,
 	grey,
-	red
+	red,
+	boss
 }
 
 public class Turret : PE_Obj {
@@ -20,6 +21,8 @@ public class Turret : PE_Obj {
 	override protected void Start () {
 		if (type == TurretType.man)
 						health = 1;
+		else if (type == TurretType.boss)
+						health = 8;
 		else
 						health = 5;
 		base.Start ();
@@ -35,6 +38,8 @@ public class Turret : PE_Obj {
 				Destroy (this.gameObject);
 		}
 		Vector3 diff = this.transform.position - guy.transform.position;
+		if (Mathf.Abs(diff.y) > 50)
+						return;
 		float fireAngle = Mathf.Atan (diff.y / diff.x);
 		if (guy.transform.position.x <= this.transform.position.x)
 						fireAngle += Mathf.PI;
@@ -53,7 +58,9 @@ public class Turret : PE_Obj {
 						fireTimer++;
 		else {
 				GameObject bullet = Instantiate (bulletPrefab) as GameObject;
-				bullet.transform.position = transform.position;
+				Vector3 bulPos = transform.position;
+				bulPos.y += 1;
+				bullet.transform.position = bulPos;
 				float bulletSpeed = bullet.GetComponent<PE_Bullet> ().speed;
 
 				bullet.GetComponent<PE_Bullet> ().vel.x = Mathf.Cos (fireAngle) * bulletSpeed;
