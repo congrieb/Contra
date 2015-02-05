@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public enum FacingDir{
@@ -15,7 +16,6 @@ public enum FacingDir{
 
 public enum GunType{
 	normal,
-	rapidFire,
 	machineGun,
 	spreadGun,
 	laser,
@@ -24,28 +24,33 @@ public enum GunType{
 
 public class PE_Guy : PE_Obj {
 	public FacingDir fD = FacingDir.right;
+	public bool isDead = false;
+	private int lives = 3;
+	private float deathTime = 0f;
+	private Vector3 deathPos;
 
 	public bool isCrouching = false;
 	private bool isInAir = false;
 	private bool isClimbing = false;
+	private bool didIFall = false;
+
 
 	public float speed = 5f;
 
 	private FacingDir lastDir = FacingDir.right;
 	public float jumpSpeed = 20f;
-	private Vector3 ogScale;
-	
+
 	protected float layerTimerCrouch = 0;
 	private float layerTimerCrouchMax = .25f;
 
 	private float climbTimer = 0f;
 
 	//How long between shots
-	public float normFireRate;
-	public float normBurstRate;
+	public float normFireRate = .1f;
+	public float normBurstRate = 1f;
 	private float fireRate = .1f;
 	//How long between bursts
-	private float burstRate = 2f;
+	private float burstRate = 1f;
 	public GunType gunType = GunType.normal;
 	private float nextBurst;
 	private int numFired;
@@ -78,20 +83,36 @@ public class PE_Guy : PE_Obj {
 	public GameObject bulletPrefab;
 
 	override protected void Start(){
-		ogScale = transform.lossyScale;
 		spriteRend = this.GetComponent<SpriteRenderer> ();
 		base.Start();
 	}
 
-	void updateGunProps(){
-		if (gunType == GunType.machineGun){
-			fireRate = .12f;
-			burstRate = .15f;
-		}
-		else{
-			fireRate = normFireRate;
-			burstRate = normBurstRate;
-		}
+	private void respawn(bool fell , Vector3 whereAt){
+
+		print ("You fell");
+		whereAt.y  = 330;
+		if(didIFall)
+			whereAt.x -= 20;
+		acc.y = 0;
+		this.transform.position = whereAt;
+		isDead = false;
+		
+	}
+	
+	public void death(bool fell, Vector3 whereAt){
+		print ("I'm hit");
+		isDead = true;
+		deathPos = whereAt;
+		Vector3 temp = Vector3.zero;
+		temp.y = 10000;
+		didIFall = fell;
+		this.transform.position = temp;
+		deathTime = Time.time;
+		lives--;
+		GameObject scoreCount = GameObject.Find ("LivesCounter");
+		string lifeText = "Lives: " + lives.ToString ();
+		Text oldText = scoreCount.GetComponent<Text> ();
+		oldText.text = lifeText;
 	}
 
 	void updateSprite(){
@@ -144,23 +165,35 @@ public class PE_Guy : PE_Obj {
 
 	// Update is called once per frame
 	void Update () {
+		//Handle respawning
+		if (isDead && ((deathTime + 1f) < Time.time)) {
+				if(lives > -1)
+						respawn (didIFall, deathPos);
+		}
+
+		if (lives < 0)
+						Application.LoadLevel ("_Scene_0");
+
 		//Reset Burst Fire
 			if (Time.time > nextBurst)
 						numFired = 0;
 
 		updateSprite ();
-		updateGunProps ();
 
 		// Bullet-time
 		if(Input.GetKeyDown(KeyCode.R)) {
 			if(!bulletTime){
-				speed *= 3;
-				vel.x *= 3;
+				speed *= 2f;
+				vel.x *= 2f;
+				fireRate *= .5f;
+				burstRate *= .5f;
 				Time.timeScale = (1f/3f);
 				bulletTime = true;
 			} else {
-				speed /= 3;
-				vel.x /= 3;
+				speed /= 2f;
+				vel.x /= 2f;
+				fireRate /= .5f;
+				burstRate /= .5f;
 				Time.timeScale = 1f;
 				bulletTime = false;
 			}
@@ -268,13 +301,16 @@ public class PE_Guy : PE_Obj {
 		}
 
 		// Shoot Button
+		//Machine Gun fire
 		if ((Input.GetKey(KeyCode.Z) || Input.GetKey (KeyCode.Comma)) && gunType == GunType.machineGun) {
 			shootBullet();
 		}
-
+		//Normal  fire
 		if(Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Comma)){
 			shootBullet();
 		}
+
+
 	}
 
 	void makeCrouch() {
@@ -369,9 +405,9 @@ public class PE_Guy : PE_Obj {
 		else if (numFired >= 4) {
 			return;
 		} else {
-			print("Here");
-			if(numFired == 0)
+			if(numFired == 0) {
 				nextBurst = Time.time + burstRate;
+			}
 			nextFire = Time.time + fireRate;
 			numFired++;
 		}
@@ -421,8 +457,9 @@ public class PE_Guy : PE_Obj {
 			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(3*Mathf.PI/4) * bulletSpeed;
 			break;
 		}
-		if (gunType == GunType.spreadGun)
-						spreadFire (fireAngle);
+		if (gunType == GunType.spreadGun) {
+			spreadFire(fireAngle);
+		}
 	}
 
 	void spreadFire(float fireAngle){
@@ -436,7 +473,7 @@ public class PE_Guy : PE_Obj {
 		GameObject bullet4 = Instantiate (bulletPrefab) as GameObject;
 		bullet4.transform.position = transform.position;
 
-		float spreadRate = Mathf.PI / 18;
+		float spreadRate = Mathf.PI / 23;
 
 		float bulletSpeed = bullet1.GetComponent<PE_Bullet>().speed;
 
@@ -475,37 +512,34 @@ public class PE_Guy : PE_Obj {
 	override protected void ResolveCollisionWith(PE_Obj that) {
 			switch (that.coll) {
 				case PE_Collider.platform:
-				
-				// In Progress
-						Vector3 thatP = that.transform.position;
-						Vector3 delta = (pos1 - this.transform.lossyScale / 2) - (thatP - that.transform.lossyScale / 2);
-						if (isInWater) {
-								if (!isClimbing) {
-										climbTimer = Time.time;
-										isClimbing = true;
-								}
-								Vector3 newPos = transform.position;
+					// In Progress
+					Vector3 thatP = that.transform.position;
+					Vector3 delta = (pos1 - this.transform.lossyScale / 2) - (thatP - that.transform.lossyScale / 2);
+					if (isInWater) {
+							if (!isClimbing) {
+									climbTimer = Time.time;
+									isClimbing = true;
+							}
+							Vector3 newPos = transform.position;
 
-								//Take a quarter of a second to climb up ledge
-								if (Time.time > climbTimer + .15f) {
-										isInWater = false;
-										isClimbing = false;
-										RepositionToTop (that);
-										break;
-								}
-								newPos = transform.position;
-								if (transform.position.x > thatP.x) {
-										newPos.x = thatP.x + (that.transform.lossyScale.x / 2);
-								} else if (transform.position.x < thatP.x) {
+							//Take a quarter of a second to climb up ledge
+							if (Time.time > climbTimer + .15f) {
+									isInWater = false;
+									isClimbing = false;
+									RepositionToTop (that);
+									break;
+							}
+							newPos = transform.position;
+							if (transform.position.x > thatP.x) {
+									newPos.x = thatP.x + (that.transform.lossyScale.x / 2);
+							} else if (transform.position.x < thatP.x) {
 
-										newPos.x = thatP.x - (that.transform.lossyScale.x / 2);
-								}
-								this.transform.position = newPos;
+									newPos.x = thatP.x - (that.transform.lossyScale.x / 2);
+							}
+							this.transform.position = newPos;
 				
 						} else if (delta.y >= 0) { // Top
-					
 								if (vel.y <= 0) {
-								
 										// Landed!
 										if (isInAir) {
 												isInAir = false;
@@ -514,30 +548,61 @@ public class PE_Guy : PE_Obj {
 										if (fD == FacingDir.down)
 												fD = lastDir;
 										RepositionToTop (that);
-							
 								}
 						}
-				
 						break;
+
+
 				//TODO Change this to handle sprites properly
 				case PE_Collider.water:
+					//If you are in the water then you can no longer jump
+					isInWater = true;
+					if(isInAir){
+						isInAir = false;
+						makeNotJump();
+					}
 
-				//If you are in the water then you can no longer jump
-						isInWater = true;
-						if(isInAir){
-							isInAir = false;
-							makeNotJump();
-						}
-
-						RepositionToTop (that);
-						break;
-
+					RepositionToTop (that);
+					break;
 
 				case PE_Collider.enemyBullet:
-						PhysEngine.objs.Remove (this.GetComponent<PE_Obj> ());
-						Application.LoadLevel(0);
-						Destroy (this.gameObject);
-						break;
+					if(!isDead)
+						death(false, transform.position);
+			break;
+
+				case PE_Collider.powerup:
+					PowerupType pt = that.GetComponent<PE_Powerup>().powerupType;
+					print("You got a powerup of type: " + pt);
+					switch(pt){
+						case PowerupType.rapidFire:
+							fireRate *= .85f;
+							burstRate *= .85f;
+							break;
+						case PowerupType.machineGun:
+							gunType = GunType.machineGun;
+							fireRate = .12f;
+							burstRate = .15f;
+							break;
+						case PowerupType.spreadGun:
+							gunType = GunType.spreadGun;
+							fireRate = normFireRate;
+							burstRate = normBurstRate;
+							break;
+						case PowerupType.laser:
+							gunType = GunType.laser;
+							fireRate = 1f;
+							burstRate = 1f;
+							break;
+						case PowerupType.flame:
+							gunType = GunType.flame;
+							fireRate = .3f;
+							burstRate = 1f;
+							break;
+					}
+					// Remove powerup from game
+					PhysEngine.objs.Remove(that.GetComponent<PE_Obj>());
+					Destroy(that.gameObject);
+					break;
 				}
 			
 

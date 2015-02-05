@@ -46,14 +46,18 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\BossButton.cs" />
+     <Compile Include="Assets\BridgeWatcher.cs" />
      <Compile Include="Assets\FootballSpawner.cs" />
      <Compile Include="Assets\PE_Bullet.cs" />
+     <Compile Include="Assets\PE_FlameBullet.cs" />
      <Compile Include="Assets\PE_Football.cs" />
      <Compile Include="Assets\PE_Guy.cs" />
      <Compile Include="Assets\PE_Obj.cs" />
      <Compile Include="Assets\PE_Powerup.cs" />
      <Compile Include="Assets\PE_Runner.cs" />
      <Compile Include="Assets\PhysEngine.cs" />
+     <Compile Include="Assets\PowerUpBox.cs" />
      <Compile Include="Assets\Spawner.cs" />
      <Compile Include="Assets\Turret.cs" />
  <Reference Include="UnityEngine.UI">

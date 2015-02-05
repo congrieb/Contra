@@ -5,7 +5,8 @@ public enum EnemyType {
 	runner,
 	turretMan,
 	redTurret,
-	greyTurret
+	greyTurret,
+	bossTurret
 }
 
 public class Spawner : MonoBehaviour {
@@ -13,6 +14,7 @@ public class Spawner : MonoBehaviour {
 	public GameObject turretManPrefab;
 	public GameObject redTurretPrefab;
 	public GameObject greyTurretPrefab;
+	public GameObject bossTurretPrefab;
 
 	public EnemyType enemyType = EnemyType.runner;
 	public bool multiSpawner = false;
@@ -52,6 +54,10 @@ public class Spawner : MonoBehaviour {
 		case EnemyType.greyTurret:
 			GameObject greyTurretGO = (GameObject) Instantiate(greyTurretPrefab);
 			greyTurretGO.transform.position = this.transform.position;
+			break;
+		case EnemyType.bossTurret:
+			GameObject bossTurretGO = (GameObject) Instantiate(bossTurretPrefab);
+			bossTurretGO.transform.position = this.transform.position;
 			break;
 		}
 	}

@@ -3,6 +3,7 @@ using System.Collections;
 
 public class FootballSpawner : MonoBehaviour {
 	public GameObject footballPrefab;
+	public PowerupType powerupType;
 	
 	void FixedUpdate () {
 		if (justLeftScreen ()) {
@@ -14,6 +15,7 @@ public class FootballSpawner : MonoBehaviour {
 	void spawn() {
 		GameObject footballGO = (GameObject) Instantiate(footballPrefab);
 		footballGO.transform.position = this.transform.position;
+		footballGO.GetComponent<PE_Football>().powerupType = this.powerupType;
 	}
 	
 	bool justLeftScreen(){

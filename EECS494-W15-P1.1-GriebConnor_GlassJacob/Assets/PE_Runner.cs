@@ -43,9 +43,9 @@ public class PE_Runner : PE_Obj {
 				break;
 
 			case PE_Collider.guy: // collide with guy
-				PhysEngine.objs.Remove(that.GetComponent<PE_Obj>());
-				Application.LoadLevel(0);
-				Destroy(that.gameObject);
+				PE_Guy guy = that.GetComponent<PE_Guy> ();
+				if(!guy.isDead)
+					guy.death(false, that.transform.position);
 				break;
 
 			case PE_Collider.friendlyBullet: // collide with friendlyBullet

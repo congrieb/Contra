@@ -1,13 +1,17 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\PE_Guy.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\BridgeWatcher.cs">
     <Files>
-      <File FileName="..\..\..\Unity Games\EECS494-W15-P1.1-GriebConnor_GlassJacob\Assets\PE_Bullet.cs" Line="1" Column="1" />
-      <File FileName="..\..\..\Unity Games\EECS494-W15-P1.1-GriebConnor_GlassJacob\Assets\PE_Obj.cs" Line="1" Column="1" />
-      <File FileName="Assets\PhysEngine.cs" Line="1" Column="1" />
+      <File FileName="Assets\PowerUpBox.cs" Line="22" Column="23" />
       <File FileName="Assets\Turret.cs" Line="1" Column="1" />
       <File FileName="Assets\PE_Runner.cs" Line="1" Column="1" />
-      <File FileName="Assets\PE_Guy.cs" Line="17" Column="9" />
+      <File FileName="Assets\PE_Guy.cs" Line="1" Column="1" />
+      <File FileName="Assets\PE_Powerup.cs" Line="1" Column="1" />
+      <File FileName="Assets\PE_Bullet.cs" Line="1" Column="1" />
+      <File FileName="..\..\..\ApplePickerPrototype\Assets\Basket.cs" Line="1" Column="1" />
+      <File FileName="Assets\Spawner.cs" Line="60" Column="8" />
+      <File FileName="Assets\BridgeWatcher 1.cs" Line="45" Column="28" />
+      <File FileName="Assets\BridgeWatcher.cs" Line="43" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

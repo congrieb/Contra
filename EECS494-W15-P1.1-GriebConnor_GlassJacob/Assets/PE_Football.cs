@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
 public class PE_Football : PE_Obj {
 	public GameObject powerupPrefab;
+	public PowerupType powerupType;
 
-	// Update is called once per frame
 	void FixedUpdate () {
-		vel.y = 30 * Mathf.Sin(Time.time * 4);
+		vel.y = 25 * Mathf.Sin(Time.time * 4);
 	}
 
 	override protected void ResolveCollisionWith(PE_Obj that) {
@@ -19,6 +20,7 @@ public class PE_Football : PE_Obj {
 				// Instantiate Powerup
 				GameObject powerupGO = (GameObject) Instantiate(powerupPrefab);
 				powerupGO.transform.position = this.transform.position;
+				powerupGO.GetComponent<PE_Powerup>().powerupType = this.powerupType;
 
 				// Kill Self
 				PhysEngine.objs.Remove(this.GetComponent<PE_Obj>());

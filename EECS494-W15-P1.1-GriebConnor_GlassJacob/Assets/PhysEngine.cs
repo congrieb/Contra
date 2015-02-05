@@ -15,15 +15,31 @@ public enum PE_Collider {
 	guy,
 	enemy,
 	water,
+	powerup,
 	other
 }
 
 public class PhysEngine : MonoBehaviour {
 	static public List<PE_Obj>	objs;
+	private bool godMode = false;
+
 
 	public Vector3		gravity = new Vector3(0,-20f,0);
 
-	
+	void Update(){
+		if (Input.GetKeyDown (KeyCode.G)) {
+			if(!godMode){
+				Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("Enemies"), LayerMask.NameToLayer ("Character"), true);
+				Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("enemyBullet"), LayerMask.NameToLayer ("Character"), true);
+				godMode = true;
+			}
+			else {
+				godMode = false;
+				Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("Enemies"), LayerMask.NameToLayer ("Character"), false);
+				Physics.IgnoreLayerCollision (LayerMask.NameToLayer ("enemyBullet"), LayerMask.NameToLayer ("Character"), false);
+			}
+		}
+	}
 	// Use this for initialization
 	void Awake() {
 		objs = new List<PE_Obj>();
@@ -73,6 +89,8 @@ public class PhysEngine : MonoBehaviour {
 	void FixedUpdate () {
 		// Handle the timestep for each object
 		float dt = Time.fixedDeltaTime;
+		float vertExtent = Camera.main.camera.orthographicSize;  
+		float bottom = this.transform.position.y - vertExtent;
 
 		foreach (PE_Obj po in objs) {
 			//Adjust Camera if guy has moved pass mid way point of the screen
@@ -81,6 +99,12 @@ public class PhysEngine : MonoBehaviour {
 				Destroy(po.gameObject);
 				break;
 			}
+			if(po.transform.position.y < bottom - 5 && (po.coll == PE_Collider.guy)){
+				PE_Guy guy = po.GetComponent<PE_Guy> ();
+				if(!guy.isDead)
+					guy.death(true, po.transform.position);
+			}
+
 			if( po.coll == PE_Collider.guy && po.transform.position.x > this.transform.position.x){
 				Vector3 newPos = this.transform.position;
 				newPos.x = po.transform.position.x;
