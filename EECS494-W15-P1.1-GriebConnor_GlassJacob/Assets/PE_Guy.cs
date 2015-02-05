@@ -57,6 +57,7 @@ public class PE_Guy : PE_Obj {
 	private float nextFire;
 	private bool bulletTime = false;
 
+
 	private bool isInWater;
 	private SpriteRenderer spriteRend;
 
@@ -81,6 +82,8 @@ public class PE_Guy : PE_Obj {
 
 	// Prefab for bullets
 	public GameObject bulletPrefab;
+	public GameObject laserBulletPrefab;
+	public GameObject flameBulletPrefab;
 
 	override protected void Start(){
 		spriteRend = this.GetComponent<SpriteRenderer> ();
@@ -90,7 +93,7 @@ public class PE_Guy : PE_Obj {
 	private void respawn(bool fell , Vector3 whereAt){
 
 		print ("You fell");
-		whereAt.y  = 300;
+		whereAt.y  = 290;
 		if(didIFall)
 			whereAt.x -= 20;
 		acc.y = 0;
@@ -176,7 +179,7 @@ public class PE_Guy : PE_Obj {
 		}
 
 		if (lives < 0)
-						Application.LoadLevel (Application.loadedLevel);
+						Application.LoadLevel ("_Scene_StartScreen");
 
 		//Reset Burst Fire
 			if (Time.time > nextBurst)
@@ -248,13 +251,6 @@ public class PE_Guy : PE_Obj {
 			}
 		}
 
-		if(Input.GetKeyDown(KeyCode.P)){
-			Application.LoadLevel("_Scene_1");
-		}
-		if (Input.GetKeyDown (KeyCode.O)) {
-						Application.LoadLevel ("_Scene_0");
-		}
-
 		if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)) {
 			if(isCrouching) {
 				makeNotCrouch();
@@ -318,6 +314,220 @@ public class PE_Guy : PE_Obj {
 
 
 	}
+
+    void shootBullet()
+    {
+        // Burst shooting mechanincs
+        if (Time.time < nextFire)
+            return;
+        else if (numFired >= 4)
+        {
+            return;
+        }
+        else
+        {
+            if (numFired == 0)
+            {
+                nextBurst = Time.time + burstRate;
+            }
+            nextFire = Time.time + fireRate;
+            numFired++;
+        }
+
+        // Machine and Normal & Spread guns
+        if (gunType == GunType.spreadGun || gunType == GunType.normal || gunType == GunType.machineGun)
+        {
+            GameObject bullet = Instantiate(bulletPrefab) as GameObject;
+            bullet.transform.position = transform.position;
+            float bulletSpeed = bullet.GetComponent<PE_Bullet>().speed;
+            float fireAngle = 0;
+            switch (fD)
+            {
+                case FacingDir.upFaceLeft:
+                    fireAngle = Mathf.PI / 2;
+                    bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
+                    break;
+                case FacingDir.upFaceRight:
+                    fireAngle = Mathf.PI / 2;
+                    bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
+                    break;
+                case FacingDir.upRight:
+                    fireAngle = Mathf.PI / 4;
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(Mathf.PI / 4) * bulletSpeed;
+                    break;
+                case FacingDir.right:
+                    fireAngle = 0;
+                    bullet.GetComponent<PE_Bullet>().vel.x = bulletSpeed;
+                    break;
+                case FacingDir.downRight:
+                    fireAngle = 7 * Mathf.PI / 4;
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(7 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(7 * Mathf.PI / 4) * bulletSpeed;
+                    break;
+                case FacingDir.down:
+                    fireAngle = 3 * Mathf.PI / 2;
+                    bullet.GetComponent<PE_Bullet>().vel.y = -bulletSpeed;
+                    break;
+                case FacingDir.downLeft:
+                    fireAngle = 5 * Mathf.PI / 4;
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(5 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(5 * Mathf.PI / 4) * bulletSpeed;
+                    break;
+                case FacingDir.left:
+                    fireAngle = Mathf.PI;
+                    bullet.GetComponent<PE_Bullet>().vel.x = -bulletSpeed;
+                    break;
+                case FacingDir.upLeft:
+                    fireAngle = 3 * Mathf.PI / 4;
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(3 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(3 * Mathf.PI / 4) * bulletSpeed;
+                    break;
+            }
+            if (gunType == GunType.spreadGun)
+            {
+                spreadFire(fireAngle);
+            }
+        }
+
+        // Laser Gun
+        else if (gunType == GunType.laser)
+        {
+            GameObject bullet = Instantiate(laserBulletPrefab) as GameObject;
+            bullet.transform.position = transform.position;
+            float bulletSpeed = bullet.GetComponent<PE_Bullet>().speed;
+            switch (fD)
+            {
+                case FacingDir.upFaceLeft:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 90);
+                    bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
+                    break;
+                case FacingDir.upFaceRight:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 90);
+                    bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
+                    break;
+                case FacingDir.upRight:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 45);
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(Mathf.PI / 4) * bulletSpeed;
+                    break;
+                case FacingDir.right:
+                    bullet.GetComponent<PE_Bullet>().vel.x = bulletSpeed;
+                    break;
+                case FacingDir.downRight:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 315);
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(7 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(7 * Mathf.PI / 4) * bulletSpeed;
+                    break;
+                case FacingDir.down:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 270);
+                    bullet.GetComponent<PE_Bullet>().vel.y = -bulletSpeed;
+                    break;
+                case FacingDir.downLeft:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 225);
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(5 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(5 * Mathf.PI / 4) * bulletSpeed;
+                    break;
+                case FacingDir.left:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 180);
+                    bullet.GetComponent<PE_Bullet>().vel.x = -bulletSpeed;
+                    break;
+                case FacingDir.upLeft:
+                    bullet.transform.rotation = Quaternion.Euler(0, 0, 135);
+                    bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(3 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(3 * Mathf.PI / 4) * bulletSpeed;
+                    break;
+            }
+
+        }
+
+        // Flame Gun
+        else if (gunType == GunType.flame)
+        {
+            GameObject bullet = Instantiate(flameBulletPrefab) as GameObject;
+            bullet.transform.position = transform.position;
+            bullet.GetComponent<PE_FlameBullet>().ogTime = Time.time;
+            float bulletSpeed = bullet.GetComponent<PE_Bullet>().speed;
+            float xVel, yVel;
+            switch (fD)
+            {
+                case FacingDir.upFaceLeft:
+                    xVel = 0f;
+                    yVel = bulletSpeed;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.upFaceRight:
+                    xVel = 0f;
+                    yVel = bulletSpeed;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.upRight:
+                    xVel = Mathf.Cos(Mathf.PI / 4) * bulletSpeed;
+                    yVel = Mathf.Sin(Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.right:
+                    xVel = bulletSpeed;
+                    yVel = 0f;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.downRight:
+                    xVel = Mathf.Cos(7 * Mathf.PI / 4) * bulletSpeed;
+                    yVel = Mathf.Sin(7 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.down:
+                    xVel = 0f;
+                    yVel = -bulletSpeed;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.downLeft:
+                    xVel = Mathf.Cos(5 * Mathf.PI / 4) * bulletSpeed;
+                    yVel = Mathf.Sin(5 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.left:
+                    xVel = -bulletSpeed;
+                    yVel = 0;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+                case FacingDir.upLeft:
+                    xVel = Mathf.Cos(3 * Mathf.PI / 4) * bulletSpeed;
+                    yVel = Mathf.Sin(3 * Mathf.PI / 4) * bulletSpeed;
+                    bullet.GetComponent<PE_FlameBullet>().xSpeed = xVel;
+                    bullet.GetComponent<PE_FlameBullet>().ySpeed = yVel;
+                    bullet.GetComponent<PE_Bullet>().vel.x = xVel;
+                    bullet.GetComponent<PE_Bullet>().vel.y = yVel;
+                    break;
+            }
+
+        }
+
+    }
 
 	void makeCrouch() {
 	
@@ -405,68 +615,7 @@ public class PE_Guy : PE_Obj {
 		fD = lastDir;
 	}
 
-	void shootBullet() {
-		if (Time.time < nextFire)
-			return;
-		else if (numFired >= 4) {
-			return;
-		} else {
-			if(numFired == 0) {
-				nextBurst = Time.time + burstRate;
-			}
-			nextFire = Time.time + fireRate;
-			numFired++;
-		}
-		GameObject bullet = Instantiate (bulletPrefab) as GameObject;
-		bullet.transform.position = transform.position;
-		float bulletSpeed = bullet.GetComponent<PE_Bullet>().speed;
-		float fireAngle = 0; 
-		switch (fD) {
-		case FacingDir.upFaceLeft:
-			fireAngle = Mathf.PI / 2;
-			bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
-			break;
-		case FacingDir.upFaceRight:
-			fireAngle = Mathf.PI / 2;
-			bullet.GetComponent<PE_Bullet>().vel.y = bulletSpeed;
-			break;
-		case FacingDir.upRight:
-			fireAngle = Mathf.PI / 4;
-			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(Mathf.PI/4) * bulletSpeed;
-			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(Mathf.PI/4) * bulletSpeed;
-			break;
-		case FacingDir.right:
-			fireAngle = 0;
-			bullet.GetComponent<PE_Bullet>().vel.x = bulletSpeed;
-			break;
-		case FacingDir.downRight:
-			fireAngle = 7*Mathf.PI/4;
-			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(7*Mathf.PI/4) * bulletSpeed;
-			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(7*Mathf.PI/4) * bulletSpeed;
-			break;
-		case FacingDir.down:
-			fireAngle = 3 * Mathf.PI / 2;
-			bullet.GetComponent<PE_Bullet>().vel.y = -bulletSpeed;
-			break;
-		case FacingDir.downLeft:
-			fireAngle = 5*Mathf.PI/4;
-			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(5*Mathf.PI/4) * bulletSpeed;
-			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(5*Mathf.PI/4) * bulletSpeed;
-			break;
-		case FacingDir.left:
-			fireAngle = Mathf.PI;
-			bullet.GetComponent<PE_Bullet>().vel.x = -bulletSpeed;
-			break;
-		case FacingDir.upLeft:
-			fireAngle = 3*Mathf.PI/4;
-			bullet.GetComponent<PE_Bullet>().vel.x = Mathf.Cos(3*Mathf.PI/4) * bulletSpeed;
-			bullet.GetComponent<PE_Bullet>().vel.y = Mathf.Sin(3*Mathf.PI/4) * bulletSpeed;
-			break;
-		}
-		if (gunType == GunType.spreadGun) {
-			spreadFire(fireAngle);
-		}
-	}
+
 
 	void spreadFire(float fireAngle){
 

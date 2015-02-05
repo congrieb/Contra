@@ -24,6 +24,6 @@ public class BossButton : PE_Obj {
 	// Update is called once per frame
 	void Update () {
 		if (health < 0)
-						Application.LoadLevel ("_Scene_0");
+						Application.LoadLevel ("_Scene_StartScreen");
 	}
 }
